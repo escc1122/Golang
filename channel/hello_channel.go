@@ -72,7 +72,7 @@ func withSelect() {
 
 func main() {
 	// hello()
-	// hello2()
+	hello2()
 	// withRange()
-	withSelect()
+	// withSelect()
 }
