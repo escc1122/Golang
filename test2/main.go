@@ -12,6 +12,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"test2/links"
 )
@@ -35,8 +36,7 @@ func crawl(url string) []string {
 
 //!-sema
 
-//!+
-func main() {
+func test1() {
 	worklist := make(chan []string)
 	var n int // number of pending sends to worklist
 
@@ -60,6 +60,47 @@ func main() {
 			}
 		}
 	}
+}
+
+func test2() {
+	worklist := make(chan []string, 20)
+	var n int // number of pending sends to worklist
+
+	// Start with the command-line arguments.
+	urls := []string{"https://golang.org"}
+
+	n = 3
+	go func() { worklist <- urls }()
+
+	// Crawl the web concurrently.
+	seen := make(map[string]bool)
+	for ; n > 0; n-- {
+		list := <-worklist
+		for _, link := range list {
+			if !seen[link] {
+				seen[link] = true
+				go func(link string) {
+					worklist <- crawl(link)
+				}(link)
+			}
+		}
+	}
+
+	for {
+		select {
+		case <-worklist: // Channel 中有資料執行此區域
+			fmt.Println("main goroutine finished")
+		default: // Channel 阻塞的話執行此區域
+			fmt.Println("WAITING...")
+			time.Sleep(500 * time.Millisecond)
+		}
+	}
+
+}
+
+//!+
+func main() {
+	test2()
 }
 
 //!-
