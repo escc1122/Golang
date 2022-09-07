@@ -68,6 +68,8 @@ type githubData struct {
 	CurrentUserUrl string `json:"current_user_url"`
 }
 
+var githubDataInterFace interface{}
+
 func withJson() {
 	client := &http.Client{}
 	req, _ := http.NewRequest(http.MethodGet, "https://api.github.com", nil)
@@ -87,7 +89,18 @@ func withJson() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("%s", githubData.CurrentUserUrl)
+	fmt.Printf("%s", githubData.CurrentUserUrl+"\n")
+
+	githubDataAll := githubDataInterFace
+	err = json.Unmarshal(sitemap, &githubDataAll)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	m, ok := githubDataAll.(map[string]interface{})
+	fmt.Println(ok)
+	fmt.Printf("%s", m["current_user_url"])
+
 }
 
 func withCookie() {
@@ -114,7 +127,7 @@ func withCookie() {
 
 func main() {
 	//withHeader()
-	//withJson()
+	withJson()
 	//noRedirect()
-	withCookie()
+	//withCookie()
 }
