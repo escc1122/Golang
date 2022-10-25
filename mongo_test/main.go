@@ -188,22 +188,36 @@ func testAgg(collection *mongo.Collection) {
 
 	//sortStage := bson.D{{"$sort", bson.M{"_id": 1}}}
 
-	sortOpt := pipeline.GetSortGenerate().SetSort("age", pipeline.ASC).SetSort("_id", pipeline.DESC).GenBsonD()
+	//sortOpt := pipeline.GetSortGenerate().SetSort("age", pipeline.ASC).SetSort("_id", pipeline.DESC).GenBsonD()
+
+	sortOpt := pipeline.GetSortGenerate().SetSort("sum_age", pipeline.DESC).GenBsonD()
 
 	fmt.Println(groupOpt)
 	fmt.Println(matchOpt)
 	fmt.Println(sortOpt)
 
-	pipeline := mongo.Pipeline{matchOpt, pipeline.GetSkipBsonD(1), pipeline.GetLimitBsonD(1)}
+	pipeline := mongo.Pipeline{matchOpt, groupOpt, sortOpt}
 
-	result, err := collection.Aggregate(context.TODO(), pipeline, opt)
+	cursor, err := collection.Aggregate(context.TODO(), pipeline, opt)
 	if err != nil {
 		log.Println(err)
 	}
 
 	var results []bson.M
-	if err = result.All(context.TODO(), &results); err != nil {
-		panic(err)
+	//if err = cursor.All(context.TODO(), &results); err != nil {
+	//	panic(err)
+	//}
+
+	for cursor.Next(context.TODO()) {
+		var result bson.M
+		if err := cursor.Decode(&result); err != nil {
+			log.Fatal(err)
+		}
+		results = append(results, result)
+		fmt.Println(result)
+	}
+	if err := cursor.Err(); err != nil {
+		log.Fatal(err)
 	}
 
 	fmt.Println(results)
