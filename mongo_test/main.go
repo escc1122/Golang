@@ -169,7 +169,7 @@ func testAgg(collection *mongo.Collection) {
 	fmt.Println(groupOpt2)
 	fmt.Println(matchOpt2)
 
-	matchOpt := pipeline.GetMatchOpt().In("name", "escc1122", "escc1124").Gen()
+	matchOpt := pipeline.GetMatchGenerate().In("name", "escc1122", "escc1124").Eq("type", "A").GenBsonD()
 
 	//matchOpt := getMatchOpt().eq("name", "escc1122").gen()
 
@@ -179,19 +179,22 @@ func testAgg(collection *mongo.Collection) {
 	//matchOpt := mongo_tools.GetMatchOpt().Gte("age", 40).Lte("age", 50).Gen()
 	//matchOpt := mongo_tools.GetMatchOpt().GteLt("age", 40, 50).Gen()
 
-	groupOpt := pipeline.GetGroupOpt().SetGroupPara("name", "name").SetGroupPara("type", "type").SetSum("sum_age", "age").SetSum("sum_money", "money").Gen()
+	groupOpt := pipeline.GetGroupGenerate().SetGroupPara("name3", "name").SetGroupPara("type3", "type").SetSum("sum_age", "age").SetSum("sum_money", "money").GenBsonD()
 
-	//limitStage := bson.D{{"$limit", 2}}
+	//
+	//limitStage := bson.D{{"$limit", 1}}
+	//
+	//skipOpt := bson.D{{"$skip", 2}}
 
 	//sortStage := bson.D{{"$sort", bson.M{"_id": 1}}}
 
+	sortOpt := pipeline.GetSortGenerate().SetSort("age", pipeline.ASC).SetSort("_id", pipeline.DESC).GenBsonD()
+
 	fmt.Println(groupOpt)
 	fmt.Println(matchOpt)
-	//fmt.Println(sortStage)
+	fmt.Println(sortOpt)
 
-	sortOpt := pipeline.GetSortOpt().SetSort("name", -1).SetSort("_id", -1).Gen()
-
-	pipeline := mongo.Pipeline{matchOpt, sortOpt, groupOpt}
+	pipeline := mongo.Pipeline{matchOpt, pipeline.GetSkipBsonD(1), pipeline.GetLimitBsonD(1)}
 
 	result, err := collection.Aggregate(context.TODO(), pipeline, opt)
 	if err != nil {

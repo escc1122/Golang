@@ -2,25 +2,30 @@ package pipeline
 
 import "go.mongodb.org/mongo-driver/bson"
 
-func GetMatchOpt() *matchOpt {
-	return &matchOpt{
-		baseOpt{
+const (
+	ASC  = 1
+	DESC = -1
+)
+
+func GetMatchGenerate() *matchGenerate {
+	return &matchGenerate{
+		baseGenerate{
 			conditions: &bson.M{},
 		},
 	}
 }
 
-func GetGroupOpt() *groupOpt {
-	return &groupOpt{
-		baseOpt{
+func GetGroupGenerate() *groupGenerate {
+	return &groupGenerate{
+		baseGenerate{
 			conditions: &bson.M{},
 		},
 	}
 }
 
-func GetSortOpt() *sortOpt {
-	return &sortOpt{
-		baseOpt{
+func GetSortGenerate() *sortGenerate {
+	return &sortGenerate{
+		baseGenerate{
 			conditions: &bson.M{},
 		},
 	}
@@ -30,11 +35,19 @@ func GetSimpleBsonD(actionKey string, actionValue interface{}) *bson.D {
 	return &bson.D{{actionKey, actionValue}}
 }
 
-type baseOpt struct {
+func GetLimitBsonD(limit int) bson.D {
+	return bson.D{{"$limit", limit}}
+}
+
+func GetSkipBsonD(skip int) bson.D {
+	return bson.D{{"$skip", skip}}
+}
+
+type baseGenerate struct {
 	conditions *bson.M
 }
 
-func (b *baseOpt) setBsonM(conditionKey string, bsonMKey string, value interface{}) {
+func (b *baseGenerate) setBsonM(conditionKey string, bsonMKey string, value interface{}) {
 	conditions := *b.conditions
 	var bsonM bson.M
 	if conditions[conditionKey] == nil {
@@ -46,94 +59,99 @@ func (b *baseOpt) setBsonM(conditionKey string, bsonMKey string, value interface
 	bsonM[bsonMKey] = value
 }
 
-func (b *baseOpt) setPara(conditionKey string, value interface{}) {
+func (b *baseGenerate) setPara(conditionKey string, value interface{}) {
 	conditions := *b.conditions
 	conditions[conditionKey] = value
 }
 
-type matchOpt struct {
-	//conditions *bson.M
-	baseOpt
+type matchGenerate struct {
+	baseGenerate
 }
 
-func (m *matchOpt) Gen() bson.D {
+func (m *matchGenerate) GenBsonD() bson.D {
 	return bson.D{
 		{"$match", m.conditions},
 	}
 }
 
-func (m *matchOpt) In(key string, value ...interface{}) *matchOpt {
+func (m *matchGenerate) In(column string, value ...interface{}) *matchGenerate {
 	a := bson.A{}
 	for _, v := range value {
 		a = append(a, v)
 	}
 	conditions := *m.conditions
-	conditions[key] = bson.D{{"$in", &a}}
+	conditions[column] = bson.D{{"$in", &a}}
 	return m
 }
 
-func (m *matchOpt) Eq(key string, value interface{}) *matchOpt {
+func (m *matchGenerate) Eq(column string, value interface{}) *matchGenerate {
 	conditions := *m.conditions
-	conditions[key] = GetSimpleBsonD("$eq", value)
+	conditions[column] = GetSimpleBsonD("$eq", value)
 	return m
 }
-func (m *matchOpt) Gt(key string, value interface{}) *matchOpt {
-	m.setBsonM(key, "$gt", value)
+func (m *matchGenerate) Gt(column string, value interface{}) *matchGenerate {
+	m.setBsonM(column, "$gt", value)
 	return m
 }
-func (m *matchOpt) Gte(key string, value interface{}) *matchOpt {
-	m.setBsonM(key, "$gte", value)
-	return m
-}
-
-func (m *matchOpt) Lt(key string, value interface{}) *matchOpt {
-	m.setBsonM(key, "$lt", value)
+func (m *matchGenerate) Gte(column string, value interface{}) *matchGenerate {
+	m.setBsonM(column, "$gte", value)
 	return m
 }
 
-func (m *matchOpt) Lte(key string, value interface{}) *matchOpt {
-	m.setBsonM(key, "$lte", value)
+func (m *matchGenerate) Lt(column string, value interface{}) *matchGenerate {
+	m.setBsonM(column, "$lt", value)
 	return m
 }
 
-func (m *matchOpt) GteLt(key string, gteValue interface{}, ltValue interface{}) *matchOpt {
-	m.Gte(key, gteValue)
-	m.Lt(key, ltValue)
+func (m *matchGenerate) Lte(column string, value interface{}) *matchGenerate {
+	m.setBsonM(column, "$lte", value)
 	return m
 }
 
-type groupOpt struct {
-	baseOpt
+func (m *matchGenerate) GteLt(column string, gteValue interface{}, ltValue interface{}) *matchGenerate {
+	m.Gte(column, gteValue)
+	m.Lt(column, ltValue)
+	return m
 }
 
-func (g *groupOpt) SetGroupPara(key string, value string) *groupOpt {
-	g.setBsonM("_id", key, "$"+value)
+type groupGenerate struct {
+	baseGenerate
+}
+
+func (g *groupGenerate) SetGroupPara(aliases string, value string) *groupGenerate {
+	g.setBsonM("_id", aliases, "$"+value)
 	return g
 }
 
-func (g *groupOpt) SetSum(sumKey string, value string) *groupOpt {
+func (g *groupGenerate) SetSum(aliases string, sumPara string) *groupGenerate {
 	conditions := *g.conditions
-	conditions[sumKey] = GetSimpleBsonD("$sum", "$"+value)
+	conditions[aliases] = GetSimpleBsonD("$sum", "$"+sumPara)
 	return g
 }
 
-func (g *groupOpt) Gen() bson.D {
+func (g *groupGenerate) SetCount(aliases string) *groupGenerate {
+	conditions := *g.conditions
+	conditions[aliases] = GetSimpleBsonD("$sum", 1)
+	return g
+}
+
+func (g *groupGenerate) GenBsonD() bson.D {
 	return bson.D{
 		{"$group", g.conditions},
 	}
 }
 
-type sortOpt struct {
-	baseOpt
+type sortGenerate struct {
+	baseGenerate
 }
 
-func (s *sortOpt) Gen() bson.D {
+func (s *sortGenerate) GenBsonD() bson.D {
 	return bson.D{
 		{"$sort", s.conditions},
 	}
 }
 
-func (s *sortOpt) SetSort(para string, sortType int) *sortOpt {
-	s.setPara(para, sortType)
+func (s *sortGenerate) SetSort(column string, sortType int) *sortGenerate {
+	s.setPara(column, sortType)
 	return s
 }
