@@ -179,7 +179,7 @@ func testAgg(collection *mongo.Collection) {
 	//matchOpt := mongo_tools.GetMatchOpt().Gte("age", 40).Lte("age", 50).Gen()
 	//matchOpt := mongo_tools.GetMatchOpt().GteLt("age", 40, 50).Gen()
 
-	groupOpt := pipeline.GetGroupGenerate().SetGroupPara("name3", "name").SetGroupPara("type3", "type").SetSum("sum_age", "age").SetSum("sum_money", "money").GenBsonD()
+	groupOpt := pipeline.GetGroupGenerate().GroupBy("name3", "name").GroupBy("type3", "type").Sum("sum_age", "age").Sum("sum_money", "money").Count("count").GenBsonD()
 
 	//
 	//limitStage := bson.D{{"$limit", 1}}
@@ -190,7 +190,7 @@ func testAgg(collection *mongo.Collection) {
 
 	//sortOpt := pipeline.GetSortGenerate().SetSort("age", pipeline.ASC).SetSort("_id", pipeline.DESC).GenBsonD()
 
-	sortOpt := pipeline.GetSortGenerate().SetSort("sum_age", pipeline.DESC).GenBsonD()
+	sortOpt := pipeline.GetSortGenerate().Sort("sum_age", pipeline.DESC).GenBsonD()
 
 	fmt.Println(groupOpt)
 	fmt.Println(matchOpt)

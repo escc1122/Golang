@@ -59,7 +59,7 @@ func (b *baseGenerate) setBsonM(conditionKey string, bsonMKey string, value inte
 	bsonM[bsonMKey] = value
 }
 
-func (b *baseGenerate) setPara(conditionKey string, value interface{}) {
+func (b *baseGenerate) setValue(conditionKey string, value interface{}) {
 	conditions := *b.conditions
 	conditions[conditionKey] = value
 }
@@ -118,18 +118,18 @@ type groupGenerate struct {
 	baseGenerate
 }
 
-func (g *groupGenerate) SetGroupPara(aliases string, value string) *groupGenerate {
-	g.setBsonM("_id", aliases, "$"+value)
+func (g *groupGenerate) GroupBy(aliases string, column string) *groupGenerate {
+	g.setBsonM("_id", aliases, "$"+column)
 	return g
 }
 
-func (g *groupGenerate) SetSum(aliases string, sumPara string) *groupGenerate {
+func (g *groupGenerate) Sum(aliases string, sumPara string) *groupGenerate {
 	conditions := *g.conditions
 	conditions[aliases] = GetSimpleBsonD("$sum", "$"+sumPara)
 	return g
 }
 
-func (g *groupGenerate) SetCount(aliases string) *groupGenerate {
+func (g *groupGenerate) Count(aliases string) *groupGenerate {
 	conditions := *g.conditions
 	conditions[aliases] = GetSimpleBsonD("$sum", 1)
 	return g
@@ -151,7 +151,7 @@ func (s *sortGenerate) GenBsonD() bson.D {
 	}
 }
 
-func (s *sortGenerate) SetSort(column string, sortType int) *sortGenerate {
-	s.setPara(column, sortType)
+func (s *sortGenerate) Sort(column string, sortType int) *sortGenerate {
+	s.setValue(column, sortType)
 	return s
 }
