@@ -179,7 +179,9 @@ func testAgg(collection *mongo.Collection) {
 	//matchOpt := mongo_tools.GetMatchOpt().Gte("age", 40).Lte("age", 50).Gen()
 	//matchOpt := mongo_tools.GetMatchOpt().GteLt("age", 40, 50).Gen()
 
-	groupOpt := pipeline.GetGroupGenerate().GroupBy("name3", "name").GroupBy("type3", "type").Sum("sum_age", "age").Sum("sum_money", "money").Count("count").GenBsonD()
+	//groupOpt := pipeline.GetGroupGenerate().GroupBy("name3", "name").GroupBy("type3", "type").Sum("sum_age", "age").Sum("sum_money", "money").Count("count").GenBsonD()
+
+	groupOpt := pipeline.GetGroupGenerate().GroupByAll().Sum("sum_age", "age").Sum("sum_money", "money").Count("count").GenBsonD()
 
 	//
 	//limitStage := bson.D{{"$limit", 1}}
@@ -203,23 +205,31 @@ func testAgg(collection *mongo.Collection) {
 		log.Println(err)
 	}
 
-	var results []bson.M
+	var results []bson.D
 	//if err = cursor.All(context.TODO(), &results); err != nil {
 	//	panic(err)
 	//}
 
+	var strutResults []Student
+
 	for cursor.Next(context.TODO()) {
-		var result bson.M
+		var result bson.D
 		if err := cursor.Decode(&result); err != nil {
 			log.Fatal(err)
 		}
 		results = append(results, result)
+
+		doc, _ := bson.Marshal(result)
+		var student Student
+		bson.Unmarshal(doc, &student)
+		strutResults = append(strutResults, student)
 		fmt.Println(result)
 	}
 	if err := cursor.Err(); err != nil {
 		log.Fatal(err)
 	}
 
+	fmt.Println(strutResults)
 	fmt.Println(results)
 
 }

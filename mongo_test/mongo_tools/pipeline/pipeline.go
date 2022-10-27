@@ -31,9 +31,9 @@ func GetSortGenerate() *sortGenerate {
 	}
 }
 
-func GetSimpleBsonD(actionKey string, actionValue interface{}) *bson.D {
-	return &bson.D{{actionKey, actionValue}}
-}
+//func GetSimpleBsonD(actionKey string, actionValue interface{}) *bson.D {
+//	return &bson.D{{actionKey, actionValue}}
+//}
 
 func GetLimitBsonD(limit int) bson.D {
 	return bson.D{{"$limit", limit}}
@@ -64,6 +64,10 @@ func (b *baseGenerate) setValue(conditionKey string, value interface{}) {
 	conditions[conditionKey] = value
 }
 
+func (b *baseGenerate) genBsonD(actionKey string, actionValue interface{}) *bson.D {
+	return &bson.D{{actionKey, actionValue}}
+}
+
 type matchGenerate struct {
 	baseGenerate
 }
@@ -86,7 +90,7 @@ func (m *matchGenerate) In(column string, value ...interface{}) *matchGenerate {
 
 func (m *matchGenerate) Eq(column string, value interface{}) *matchGenerate {
 	conditions := *m.conditions
-	conditions[column] = GetSimpleBsonD("$eq", value)
+	conditions[column] = m.genBsonD("$eq", value)
 	return m
 }
 func (m *matchGenerate) Gt(column string, value interface{}) *matchGenerate {
@@ -123,15 +127,25 @@ func (g *groupGenerate) GroupBy(aliases string, column string) *groupGenerate {
 	return g
 }
 
+// GroupByAll https://www.mongodb.com/docs/manual/reference/operator/aggregation/group/#std-label-null-example
+// Group by null
+// The following aggregation operation specifies a group _id of null, calculating the total sale amount, average quantity, and count of all documents in the collection.
+func (g *groupGenerate) GroupByAll() *groupGenerate {
+	//g.setBsonM("_id", "all", nil)
+	conditions := *g.conditions
+	conditions["_id"] = nil
+	return g
+}
+
 func (g *groupGenerate) Sum(aliases string, sumPara string) *groupGenerate {
 	conditions := *g.conditions
-	conditions[aliases] = GetSimpleBsonD("$sum", "$"+sumPara)
+	conditions[aliases] = g.genBsonD("$sum", "$"+sumPara)
 	return g
 }
 
 func (g *groupGenerate) Count(aliases string) *groupGenerate {
 	conditions := *g.conditions
-	conditions[aliases] = GetSimpleBsonD("$sum", 1)
+	conditions[aliases] = g.genBsonD("$sum", 1)
 	return g
 }
 
