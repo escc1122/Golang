@@ -1,6 +1,9 @@
 package pipeline
 
-import "go.mongodb.org/mongo-driver/bson"
+import (
+	"go.mongodb.org/mongo-driver/bson"
+	"reflect"
+)
 
 const (
 	ASC  = 1
@@ -146,6 +149,25 @@ func (g *groupGenerate) Sum(aliases string, sumPara string) *groupGenerate {
 func (g *groupGenerate) Count(aliases string) *groupGenerate {
 	conditions := *g.conditions
 	conditions[aliases] = g.genBsonD("$sum", 1)
+	return g
+}
+
+// ShowData https://www.mongodb.com/docs/manual/reference/operator/aggregation/push/#mongodb-group-grp.-push
+func (g *groupGenerate) ShowData(strut interface{}) *groupGenerate {
+	m := bson.M{}
+	val := reflect.ValueOf(strut).Elem()
+	for i := 0; i < val.NumField(); i++ {
+		tag := val.Type().Field(i).Tag
+		key := tag.Get("bson")
+		if key == "" {
+			key = tag.Get("json")
+		}
+		if key == "" {
+			key = val.Type().Field(i).Name
+		}
+		m[key] = "$" + key
+	}
+	g.setBsonM("data", "$push", m)
 	return g
 }
 

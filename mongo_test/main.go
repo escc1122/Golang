@@ -181,7 +181,7 @@ func testAgg(collection *mongo.Collection) {
 
 	//groupOpt := pipeline.GetGroupGenerate().GroupBy("name3", "name").GroupBy("type3", "type").Sum("sum_age", "age").Sum("sum_money", "money").Count("count").GenBsonD()
 
-	groupOpt := pipeline.GetGroupGenerate().GroupByAll().Sum("sum_age", "age").Sum("sum_money", "money").Count("count").GenBsonD()
+	groupOpt := pipeline.GetGroupGenerate().GroupByAll().ShowData(&Student{}).Sum("sum_age", "age").Sum("sum_money", "money").Count("count").GenBsonD()
 
 	//
 	//limitStage := bson.D{{"$limit", 1}}
@@ -205,7 +205,8 @@ func testAgg(collection *mongo.Collection) {
 		log.Println(err)
 	}
 
-	var results []bson.D
+	var results []bson.M
+
 	//if err = cursor.All(context.TODO(), &results); err != nil {
 	//	panic(err)
 	//}
@@ -213,7 +214,7 @@ func testAgg(collection *mongo.Collection) {
 	var strutResults []Student
 
 	for cursor.Next(context.TODO()) {
-		var result bson.D
+		var result bson.M
 		if err := cursor.Decode(&result); err != nil {
 			log.Fatal(err)
 		}
