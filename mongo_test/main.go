@@ -8,14 +8,16 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"mongo_test/mongo_tools/pipeline"
+	"time"
 )
 
 type Student struct {
-	ID    string `bson:"_id"`
-	Name  string `bson:"name"`
-	Age   int    `bson:"age"`
-	Type  string `bson:"type"`
-	Money int    `bson:"money"`
+	ID       string    `bson:"_id"`
+	Name     string    `bson:"name"`
+	Age      int       `bson:"age"`
+	Type     string    `bson:"type"`
+	Money    int       `bson:"money"`
+	TimeTest time.Time `bson:"time_test"`
 }
 
 func main() {
@@ -43,51 +45,59 @@ func main() {
 }
 
 func testInsert(collection *mongo.Collection) {
+	time_test, _ := time.Parse(time.RFC3339, "2020-04-01T00:00:00+08:00")
+
 	s1 := Student{
-		ID:    "id1",
-		Name:  "escc1122",
-		Type:  "A",
-		Age:   33,
-		Money: 124,
+		ID:       "id1",
+		Name:     "escc1122",
+		Type:     "A",
+		Age:      33,
+		Money:    124,
+		TimeTest: time_test.AddDate(0, 0, 1),
 	}
 
 	s2 := Student{
-		ID:    "id2",
-		Name:  "escc1122",
-		Type:  "A",
-		Age:   55,
-		Money: 124,
+		ID:       "id2",
+		Name:     "escc1122",
+		Type:     "A",
+		Age:      55,
+		Money:    124,
+		TimeTest: time_test.AddDate(0, 0, 2),
 	}
 	s3 := Student{
-		ID:    "id3",
-		Name:  "escc1124",
-		Type:  "A",
-		Age:   23,
-		Money: 234,
+		ID:       "id3",
+		Name:     "escc1124",
+		Type:     "A",
+		Age:      23,
+		Money:    234,
+		TimeTest: time_test.AddDate(0, 0, 3),
 	}
 
 	s4 := Student{
-		ID:    "id4",
-		Name:  "escc1124",
-		Type:  "B",
-		Age:   44,
-		Money: 34535,
+		ID:       "id4",
+		Name:     "escc1124",
+		Type:     "B",
+		Age:      44,
+		Money:    34535,
+		TimeTest: time_test.AddDate(0, 0, 4),
 	}
 
 	s5 := Student{
-		ID:    "id5",
-		Name:  "escc1122",
-		Type:  "B",
-		Age:   44,
-		Money: 234,
+		ID:       "id5",
+		Name:     "escc1122",
+		Type:     "B",
+		Age:      44,
+		Money:    234,
+		TimeTest: time_test.AddDate(0, 0, 5),
 	}
 
 	s6 := Student{
-		ID:    "id6",
-		Name:  "escc1122",
-		Type:  "C",
-		Age:   4,
-		Money: 345,
+		ID:       "id6",
+		Name:     "escc1122",
+		Type:     "C",
+		Age:      4,
+		Money:    345,
+		TimeTest: time_test.AddDate(0, 0, 6),
 	}
 
 	sArr := []interface{}{
@@ -232,5 +242,9 @@ func testAgg(collection *mongo.Collection) {
 
 	fmt.Println(strutResults)
 	fmt.Println(results)
+
+	data := results[0]["data"]
+
+	fmt.Println(data)
 
 }
