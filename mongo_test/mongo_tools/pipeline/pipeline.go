@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"reflect"
 )
 
@@ -28,6 +29,14 @@ func GetGroupGenerate() *groupGenerate {
 
 func GetSortGenerate() *sortGenerate {
 	return &sortGenerate{
+		baseGenerate{
+			conditions: &bson.M{},
+		},
+	}
+}
+
+func GetFacetGenerate() *facetGenerate {
+	return &facetGenerate{
 		baseGenerate{
 			conditions: &bson.M{},
 		},
@@ -190,4 +199,19 @@ func (s *sortGenerate) GenBsonD() bson.D {
 func (s *sortGenerate) Sort(column string, sortType int) *sortGenerate {
 	s.setValue(column, sortType)
 	return s
+}
+
+// facetGenerate https://www.mongodb.com/docs/v5.0/reference/operator/aggregation/facet/
+type facetGenerate struct {
+	baseGenerate
+}
+
+func (f *facetGenerate) AppendPipeline(aliases string, pipeline mongo.Pipeline) *facetGenerate {
+	f.setValue(aliases, pipeline)
+	return f
+}
+func (f *facetGenerate) GenBsonD() bson.D {
+	return bson.D{
+		{"$facet", f.conditions},
+	}
 }
