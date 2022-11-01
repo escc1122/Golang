@@ -212,7 +212,7 @@ type facetGenerate struct {
 	baseGenerate
 }
 
-func (f *facetGenerate) AppendPipeline(aliases string, pipeline mongo.Pipeline) *facetGenerate {
+func (f *facetGenerate) AppendPipeline(aliases string, pipeline *mongo.Pipeline) *facetGenerate {
 	f.setValue(aliases, pipeline)
 	return f
 }
