@@ -7,12 +7,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
-	"mongo_test/mongo_tools/pipeline"
+	"mongo_test/mongo_tools"
 	"testing"
 	"time"
 )
 
-var collection *mongo.Collection
+//var collection *mongo.Collection
 
 func init() {
 	// 设置客户端连接配置
@@ -35,7 +35,7 @@ func Test_matchGenerate_GteLt(t *testing.T) {
 	opt := &options.AggregateOptions{}
 	timeTest, _ := time.Parse(time.RFC3339, "2020-04-01T00:00:00+08:00")
 
-	matchOpt := pipeline.GetMatchGenerate().GteLt("time_test", timeTest.AddDate(0, 0, 1), timeTest.AddDate(0, 0, 2)).GenBsonD()
+	matchOpt := mongo_tools.GetMatchGenerate().GteLt("time_test", timeTest.AddDate(0, 0, 1), timeTest.AddDate(0, 0, 2)).GenBsonD()
 	matchPipeline := mongo.Pipeline{matchOpt}
 
 	cursor, err := collection.Aggregate(context.TODO(), matchPipeline, opt)
@@ -57,7 +57,7 @@ func Test_matchGenerate_GteLt(t *testing.T) {
 		t.Errorf("id err")
 	}
 
-	matchOpt = pipeline.GetMatchGenerate().In("name", "escc1122", "escc1124").Eq("type", "A").GteLt("age", 10, 40).GenBsonD()
+	matchOpt = mongo_tools.GetMatchGenerate().In("name", "escc1122", "escc1124").Eq("type", "A").GteLt("age", 10, 40).GenBsonD()
 	matchPipeline = mongo.Pipeline{matchOpt}
 	cursor, err = collection.Aggregate(context.TODO(), matchPipeline, opt)
 	if err != nil {

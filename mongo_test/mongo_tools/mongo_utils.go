@@ -1,4 +1,4 @@
-package pipeline
+package mongo_tools
 
 import (
 	"go.mongodb.org/mongo-driver/bson"
@@ -43,9 +43,15 @@ func GetFacetGenerate() *facetGenerate {
 	}
 }
 
-//func GetSimpleBsonD(actionKey string, actionValue interface{}) *bson.D {
-//	return &bson.D{{actionKey, actionValue}}
-//}
+func GetFilterGenerate() *filterGenerate {
+	return &filterGenerate{
+		conditions: &bson.A{},
+	}
+}
+
+func GenBsonD(key string, value interface{}) *bson.D {
+	return &bson.D{{key, value}}
+}
 
 func GetLimitBsonD(limit int) bson.D {
 	return bson.D{{"$limit", limit}}
@@ -214,4 +220,65 @@ func (f *facetGenerate) GenBsonD() bson.D {
 	return bson.D{
 		{"$facet", f.conditions},
 	}
+}
+
+// filterGenerate https://www.mongodb.com/docs/manual/reference/operator/query/and/#mongodb-query-op.-and
+// https://www.mongodb.com/docs/drivers/go/current/fundamentals/crud/read-operations/query-document/
+// $and
+// Syntax: { $and: [ { <expression1> }, { <expression2> } , ... , { <expressionN> } ] }
+type filterGenerate struct {
+	conditions *bson.A
+}
+
+func (f *filterGenerate) GenBsonD() bson.D {
+	return bson.D{
+		{"$and", f.conditions},
+	}
+}
+
+func (f *filterGenerate) In(column string, value ...interface{}) *filterGenerate {
+	a := bson.A{}
+	for _, v := range value {
+		a = append(a, v)
+	}
+	f.SetExpr("$in", column, &a)
+	return f
+}
+
+func (f *filterGenerate) SetExpr(action string, column string, value interface{}) *filterGenerate {
+	conditions := *f.conditions
+	conditions = append(conditions, GenBsonD(column, GenBsonD(action, value)))
+	f.conditions = &conditions
+	return f
+}
+
+func (f *filterGenerate) Eq(column string, value interface{}) *filterGenerate {
+	f.SetExpr("$eq", column, value)
+	return f
+}
+
+func (f *filterGenerate) Gt(column string, value interface{}) *filterGenerate {
+	f.SetExpr("$gt", column, value)
+	return f
+}
+
+func (f *filterGenerate) Gte(column string, value interface{}) *filterGenerate {
+	f.SetExpr("$gte", column, value)
+	return f
+}
+
+func (f *filterGenerate) Lt(column string, value interface{}) *filterGenerate {
+	f.SetExpr("$lt", column, value)
+	return f
+}
+
+func (f *filterGenerate) Lte(column string, value interface{}) *filterGenerate {
+	f.SetExpr("$lte", column, value)
+	return f
+}
+
+func (f *filterGenerate) GteLt(column string, gteValue interface{}, ltValue interface{}) *filterGenerate {
+	f.Gte(column, gteValue)
+	f.Lt(column, ltValue)
+	return f
 }

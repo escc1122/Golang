@@ -7,7 +7,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
-	"mongo_test/mongo_tools/pipeline"
+	"mongo_test/mongo_tools"
+	"reflect"
 	"time"
 )
 
@@ -134,6 +135,13 @@ func testInsert(collection *mongo.Collection) {
 	if err3 != nil {
 		log.Println(err2)
 	}
+
+	if reflect.TypeOf(err3).Name() == "BulkWriteException" {
+		fmt.Println("test")
+	}
+
+	fmt.Println(reflect.TypeOf(err3).Name())
+
 	fmt.Println(bulkWrite)
 }
 
@@ -179,7 +187,7 @@ func testAgg(collection *mongo.Collection) {
 	fmt.Println(groupOpt2)
 	fmt.Println(matchOpt2)
 
-	matchOpt := pipeline.GetMatchGenerate().In("name", "escc1122", "escc1124").Eq("type", "A").GenBsonD()
+	matchOpt := mongo_tools.GetMatchGenerate().In("name", "escc1122", "escc1124").Eq("type", "A").GenBsonD()
 
 	//matchOpt := getMatchOpt().eq("name", "escc1122").gen()
 
@@ -191,7 +199,7 @@ func testAgg(collection *mongo.Collection) {
 
 	//groupOpt := pipeline.GetGroupGenerate().GroupBy("name3", "name").GroupBy("type3", "type").Sum("sum_age", "age").Sum("sum_money", "money").Count("count").GenBsonD()
 
-	groupOpt := pipeline.GetGroupGenerate().GroupByAll().ShowData(&Student{}).Sum("sum_age", "age").Sum("sum_money", "money").Count("count").GenBsonD()
+	groupOpt := mongo_tools.GetGroupGenerate().GroupByAll().ShowData(&Student{}).Sum("sum_age", "age").Sum("sum_money", "money").Count("count").GenBsonD()
 
 	//
 	//limitStage := bson.D{{"$limit", 1}}
@@ -202,7 +210,7 @@ func testAgg(collection *mongo.Collection) {
 
 	//sortOpt := pipeline.GetSortGenerate().SetSort("age", pipeline.ASC).SetSort("_id", pipeline.DESC).GenBsonD()
 
-	sortOpt := pipeline.GetSortGenerate().Sort("sum_age", pipeline.DESC).GenBsonD()
+	sortOpt := mongo_tools.GetSortGenerate().Sort("sum_age", mongo_tools.DESC).GenBsonD()
 
 	fmt.Println(groupOpt)
 	fmt.Println(matchOpt)

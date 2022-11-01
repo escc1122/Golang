@@ -7,7 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
-	"mongo_test/mongo_tools/pipeline"
+	"mongo_test/mongo_tools"
 	"testing"
 )
 
@@ -29,11 +29,11 @@ func Test_facetGenerate(t *testing.T) {
 
 	opt := &options.AggregateOptions{}
 
-	matchOpt := pipeline.GetMatchGenerate().In("name", "escc1122", "escc1124").Eq("type", "A").GenBsonD()
+	matchOpt := mongo_tools.GetMatchGenerate().In("name", "escc1122", "escc1124").Eq("type", "A").GenBsonD()
 
-	groupOpt := pipeline.GetGroupGenerate().GroupBy("name3", "name").GroupBy("type3", "type").Sum("sum_age", "age").Sum("sum_money", "money").Count("count").GenBsonD()
+	groupOpt := mongo_tools.GetGroupGenerate().GroupBy("name3", "name").GroupBy("type3", "type").Sum("sum_age", "age").Sum("sum_money", "money").Count("count").GenBsonD()
 
-	facetGenerate := pipeline.GetFacetGenerate()
+	facetGenerate := mongo_tools.GetFacetGenerate()
 	groupPipeline := mongo.Pipeline{groupOpt}
 
 	limitStage := bson.D{{"$limit", 1}}
