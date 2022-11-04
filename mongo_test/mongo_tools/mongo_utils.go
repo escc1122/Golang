@@ -49,8 +49,16 @@ func GetFilterGenerate() *filterGenerate {
 	}
 }
 
-func GenBsonD(key string, value interface{}) *bson.D {
-	return &bson.D{{key, value}}
+func GenSimpleBsonD(key string, value interface{}) bson.D {
+	return bson.D{{key, value}}
+}
+
+func GenBsonD(data map[string]interface{}) bson.D {
+	bsonD := bson.D{}
+	for k, v := range data {
+		bsonD = append(bsonD, bson.E{Key: k, Value: v})
+	}
+	return bsonD
 }
 
 func GetLimitBsonD(limit int) bson.D {
@@ -167,6 +175,18 @@ func (g *groupGenerate) Count(aliases string) *groupGenerate {
 	return g
 }
 
+func (g *groupGenerate) Max(aliases string, sumPara string) *groupGenerate {
+	conditions := *g.conditions
+	conditions[aliases] = g.genBsonD("$max", "$"+sumPara)
+	return g
+}
+
+func (g *groupGenerate) Min(aliases string, sumPara string) *groupGenerate {
+	conditions := *g.conditions
+	conditions[aliases] = g.genBsonD("$min", "$"+sumPara)
+	return g
+}
+
 // ShowData https://www.mongodb.com/docs/manual/reference/operator/aggregation/push/#mongodb-group-grp.-push
 func (g *groupGenerate) ShowData(strut interface{}) *groupGenerate {
 	m := bson.M{}
@@ -247,7 +267,7 @@ func (f *filterGenerate) In(column string, value ...interface{}) *filterGenerate
 
 func (f *filterGenerate) SetExpr(action string, column string, value interface{}) *filterGenerate {
 	conditions := *f.conditions
-	conditions = append(conditions, GenBsonD(column, GenBsonD(action, value)))
+	conditions = append(conditions, GenSimpleBsonD(column, GenSimpleBsonD(action, value)))
 	f.conditions = &conditions
 	return f
 }
