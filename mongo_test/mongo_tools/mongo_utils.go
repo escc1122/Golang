@@ -49,6 +49,16 @@ func GetFilterGenerate() *filterGenerate {
 	}
 }
 
+func GetBucketGenerate(groupBy string, boundaries []interface{}, otherBoundariesID interface{}) *bucketGenerate {
+	bucketGenerate := &bucketGenerate{
+		baseGenerate{
+			conditions: &bson.M{},
+		},
+	}
+	bucketGenerate.GroupBy(groupBy).SetBoundaries(boundaries).SetOtherBoundariesID(otherBoundariesID)
+	return bucketGenerate
+}
+
 func GenSimpleBsonD(key string, value interface{}) bson.D {
 	return bson.D{{key, value}}
 }
@@ -301,4 +311,53 @@ func (f *filterGenerate) GteLt(column string, gteValue interface{}, ltValue inte
 	f.Gte(column, gteValue)
 	f.Lt(column, ltValue)
 	return f
+}
+
+type bucketGenerate struct {
+	baseGenerate
+}
+
+func (b *bucketGenerate) GroupBy(column string) *bucketGenerate {
+	b.setValue("groupBy", "$"+column)
+	return b
+}
+
+func (b *bucketGenerate) SetBoundaries(boundaries []interface{}) *bucketGenerate {
+	a := bson.A{}
+	for _, v := range boundaries {
+		a = append(a, v)
+	}
+	b.setValue("boundaries", a)
+	return b
+}
+
+func (b *bucketGenerate) Count(aliases string) *bucketGenerate {
+	b.setBsonM("output", aliases, b.genBsonD("$sum", 1))
+	return b
+}
+
+func (b *bucketGenerate) Sum(aliases string, sumPara string) *bucketGenerate {
+	b.setBsonM("output", aliases, b.genBsonD("$sum", "$"+sumPara))
+	return b
+}
+
+func (b *bucketGenerate) Max(aliases string, column string) *bucketGenerate {
+	b.setBsonM("output", aliases, b.genBsonD("$max", "$"+column))
+	return b
+}
+
+func (b *bucketGenerate) Min(aliases string, column string) *bucketGenerate {
+	b.setBsonM("output", aliases, b.genBsonD("$min", "$"+column))
+	return b
+}
+
+func (b *bucketGenerate) GenBsonD() bson.D {
+	return bson.D{
+		{"$bucket", b.conditions},
+	}
+}
+
+func (b *bucketGenerate) SetOtherBoundariesID(id interface{}) *bucketGenerate {
+	b.setValue("default", id)
+	return b
 }
