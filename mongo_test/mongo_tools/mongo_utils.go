@@ -160,6 +160,7 @@ type groupGenerate struct {
 
 func (g *groupGenerate) GroupBy(aliases string, column string) *groupGenerate {
 	g.setBsonM("_id", aliases, "$"+column)
+	g.Max(aliases, column)
 	return g
 }
 
@@ -313,6 +314,7 @@ func (f *filterGenerate) GteLt(column string, gteValue interface{}, ltValue inte
 	return f
 }
 
+// bucketGenerate https://www.mongodb.com/docs/v4.4/reference/operator/aggregation/bucket/
 type bucketGenerate struct {
 	baseGenerate
 }
