@@ -24,7 +24,8 @@ type reflectTest2 struct {
 }
 
 func (r reflectTest2) test() {
-	fmt.Println("IReflectTest")
+	//fmt.Println("IReflectTest")
+	reflectPrint(r)
 }
 
 func testSetValue() {
@@ -50,39 +51,63 @@ func testTag() {
 	}
 }
 
-func test111(test interface{}) {
+func reflectPrint(test interface{}) {
 	typeOf := reflect.TypeOf(test)
 	valueOf := reflect.ValueOf(test)
 
-	fmt.Println("type:", typeOf)
 	fmt.Println("typeOf.Kind:", typeOf.Kind())
-	if typeOf.Kind() == reflect.Pointer {
+	fmt.Println("typeOf:", typeOf)
+	i := 0
+	for typeOf.Kind() == reflect.Pointer {
 		typeOf = typeOf.Elem()
-		fmt.Println("typeOf.Elem():", typeOf)
-		fmt.Println("typeOf.Elem().Kind:", typeOf.Kind())
+		fmt.Println(i, " typeOf.Elem().Kind:", typeOf.Kind())
+		fmt.Println(i, " typeOf.Elem():", typeOf)
+		i++
 	}
 
-	fmt.Println("value:", valueOf)
 	fmt.Println("valueOf.Kind:", valueOf.Kind())
-	if valueOf.Kind() == reflect.Pointer {
+	fmt.Println("valueOf:", valueOf)
+
+	j := 0
+	for valueOf.Kind() == reflect.Pointer {
 		valueOf = valueOf.Elem()
-		fmt.Println("valueOf.Elem():", valueOf)
-		fmt.Println("valueOf.Elem().Kind:", valueOf.Kind())
+		fmt.Println(j, " valueOf.Elem().Kind:", valueOf.Kind())
+		fmt.Println(j, " valueOf.Elem():", valueOf)
 	}
 
-	fmt.Println("=========================================")
+}
+
+func (r *reflectTest) test1() {
+	reflectPrint(r)
 }
 
 func test() {
-	test111(reflectTest{})
-	test111(&reflectTest{})
+
+	fmt.Println("========== print reflectTest{}")
+	reflectPrint(reflectTest{})
+	fmt.Println("========== print &reflectTest{}")
+	reflectPrint(&reflectTest{})
 	var test IReflectTest = &reflectTest{}
 	var test2 IReflectTest = reflectTest2{}
-	test111(test)
-	test111(test2)
+	fmt.Println("========== print interface &reflectTest{}")
+	reflectPrint(test)
+	fmt.Println("========== print interface reflectTest{}")
+	reflectPrint(test2)
+
+	a := &reflectTest{}
+	fmt.Println("========== print &reflectTest{} function")
+	a.test1()
+
+	fmt.Println("========== print c := &a ;a := &reflectTest{}")
+	c := &a
+	reflectPrint(c)
+
+	fmt.Println("========== print reflectTest{} function")
+	b := reflectTest2{}
+	b.test()
 
 }
 
 func main() {
-	testSetValue()
+	test()
 }
