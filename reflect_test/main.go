@@ -108,6 +108,34 @@ func test() {
 
 }
 
+func test2() {
+	a := reflectTest{
+		Aaaa: "5",
+		Bbbb: "6",
+	}
+
+	typeOf := reflect.TypeOf(a)
+	b := reflect.Zero(typeOf)
+	c := reflect.New(typeOf)
+	fmt.Println("========== print reflect.Zero(typeOf).Interface()")
+	reflectPrint(b.Interface())
+	fmt.Println("========== print reflect.New(typeOf).Interface()")
+	reflectPrint(c.Interface())
+
+	fmt.Println(b.FieldByName("Aaaa").CanSet())
+	fmt.Println(c.Elem().FieldByName("Aaaa").CanSet())
+
+	c.Elem().FieldByName("Aaaa").SetString("777")
+
+	d := c.Interface()
+
+	fmt.Println(d)
+
+	var aaaa IReflectTest = c.Interface().(IReflectTest)
+
+	fmt.Println(aaaa)
+}
+
 func main() {
-	test()
+	test2()
 }
