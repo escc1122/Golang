@@ -72,9 +72,20 @@ func withSelect() {
 	}
 }
 
+func withSelectTimeOut() {
+	ch := make(chan string)
+	select {
+	case <-ch: // Channel 中有資料執行此區域
+		fmt.Println("main goroutine finished")
+		return
+	case <-time.After(10 * time.Second):
+		fmt.Println("select time out")
+	}
+}
+
 func main() {
 	// hello()
 	//hello2()
 	// withRange()
-	withSelect()
+	withSelectTimeOut()
 }
