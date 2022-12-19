@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-//練習基本的channel
+// 練習基本的channel
 func hello() {
 	var stringChen = make(chan string, 3)
 	stringChen <- "hello"
@@ -31,7 +31,7 @@ func hello2() {
 	fmt.Println(<-stringChen)
 }
 
-//channel & range
+// channel & range
 func withRange() {
 	c := make(chan int, 10)
 	go func() {
@@ -45,17 +45,19 @@ func withRange() {
 	}
 }
 
-//channel & select
+// channel & select
 func withSelect() {
 	ch := make(chan string)
 	go func() {
-		fmt.Println("calculate goroutine starts calculating")
-		time.Sleep(time.Second) // Heavy calculation
-		fmt.Println("calculate goroutine ends calculating")
+		for i := 0; i < 5; i++ {
+			fmt.Println("calculate goroutine starts calculating")
+			time.Sleep(time.Second) // Heavy calculation
+			fmt.Println("calculate goroutine ends calculating")
 
-		ch <- "FINISH"
-		time.Sleep(time.Second)
-		fmt.Println("calculate goroutine finished")
+			ch <- "FINISH"
+			time.Sleep(time.Second)
+			fmt.Println("calculate goroutine finished")
+		}
 	}()
 
 	for {
@@ -72,7 +74,7 @@ func withSelect() {
 
 func main() {
 	// hello()
-	hello2()
+	//hello2()
 	// withRange()
-	// withSelect()
+	withSelect()
 }
