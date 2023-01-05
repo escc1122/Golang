@@ -136,6 +136,7 @@ func testChannel() {
 	fmt.Println(<-a)
 }
 
+// https://github.com/golang/gofrontend/blob/e387439bfd24d5e142874b8e68e7039f74c744d7/go/statements.cc#L5384
 func testSliceRange() {
 	type T struct {
 		id int
