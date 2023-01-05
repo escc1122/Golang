@@ -12,6 +12,11 @@ func reflectPrint(test interface{}) {
 	fmt.Println("valueOf:", valueOf)
 }
 
+func printPoint(msg string, test interface{}) {
+	valueOf := reflect.ValueOf(test)
+	fmt.Println(msg, "pointer:", valueOf.Pointer())
+}
+
 func testArray() {
 	a := [2]string{"5", "6"}
 	//[5 6]
@@ -131,6 +136,32 @@ func testChannel() {
 	fmt.Println(<-a)
 }
 
+func testSliceRange() {
+	type T struct {
+		id int
+	}
+	t1 := T{id: 1}
+	t2 := T{id: 2}
+	ts1 := []T{t1, t2}
+	ts2 := []*T{}
+	for i, t := range ts1 {
+		//test1 pointer: 824633835656
+		//test1 pointer: 824633835656
+		printPoint("test1", &t)
+
+		//test2 pointer: 824633835680
+		//test2 pointer: 824633835688
+		printPoint("test2", &ts1[i])
+		ts2 = append(ts2, &t)
+	}
+
+	//2
+	//2
+	for _, t := range ts2 {
+		fmt.Println((*t).id)
+	}
+}
+
 func main() {
-	testChannel()
+	testSliceRange()
 }
