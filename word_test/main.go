@@ -2,14 +2,7 @@
 package main
 
 import (
-	"fmt"
-	"reflect"
-
-	"baliance.com/gooxml/color"
 	"baliance.com/gooxml/document"
-	"baliance.com/gooxml/measurement"
-
-	"baliance.com/gooxml/schema/soo/wml"
 )
 
 type AlTest struct {
@@ -17,118 +10,24 @@ type AlTest struct {
 	Test string `json:"test"`
 }
 
-func addHeading1(doc *document.Document, text string) {
-	para := doc.AddParagraph()
-	run := para.AddRun()
-	run.Properties().SetBold(true)
-	para.SetStyle("Heading1")
-	run.AddText(text)
+type AlTest1 struct {
+	bbbbb AlTest2 `json:"bbbbb"`
+	ccccc AlTest2 `json:"ccccc"`
 }
 
-func addText(doc *document.Document, text string) {
-	para := doc.AddParagraph()
-	run := para.AddRun()
-	run.AddText(text)
-}
-
-func addIntroduction(doc *document.Document) {
-	addHeading1(doc, "Introduction")
-	addText(doc, "說明API 用途")
-}
-
-func addRequestParameters(doc *document.Document, data interface{}) {
-	addHeading1(doc, "Request parameters")
-	{
-		table := doc.AddTable()
-		table.Properties().SetWidthPercent(100)
-		borders := table.Properties().Borders()
-		borders.SetAll(wml.ST_BorderSingle, color.Auto, 1*measurement.Point)
-		hdrRow := table.AddRow()
-		{
-			cell := hdrRow.AddCell()
-			cellPara := cell.AddParagraph()
-			cellPara.Properties().SetAlignment(wml.ST_JcLeft)
-			run := cellPara.AddRun()
-			run.Properties().SetBold(true)
-			run.AddText("Attribute")
-		}
-		{
-			cell := hdrRow.AddCell()
-			cellPara := cell.AddParagraph()
-			cellPara.Properties().SetAlignment(wml.ST_JcLeft)
-			run := cellPara.AddRun()
-			run.Properties().SetBold(true)
-			run.AddText("Type")
-		}
-		{
-			cell := hdrRow.AddCell()
-			cellPara := cell.AddParagraph()
-			cellPara.Properties().SetAlignment(wml.ST_JcLeft)
-			run := cellPara.AddRun()
-			run.Properties().SetBold(true)
-			run.AddText("Required")
-		}
-		{
-			cell := hdrRow.AddCell()
-			cellPara := cell.AddParagraph()
-			cellPara.Properties().SetAlignment(wml.ST_JcLeft)
-			run := cellPara.AddRun()
-			run.Properties().SetBold(true)
-			run.AddText("Description")
-		}
-
-		t := reflect.TypeOf(data)
-		for i := 0; i < t.NumField(); i++ {
-			field := t.Field(i)
-			fmt.Println(field.Tag.Get("json"))
-
-			row := table.AddRow()
-			cell := row.AddCell()
-			cell.AddParagraph().AddRun().AddText(field.Tag.Get("json"))
-
-			for j := 0; j < 3; j++ {
-				cell := row.AddCell()
-				cell.AddParagraph().AddRun()
-				//cell := row.AddCell()
-				//cell.AddParagraph().AddRun().AddText()
-			}
-
-			//field := t.Field(i)
-			//fmt.Println(field.Tag.Get("json"))
-		}
-
-		//veryLightGray := color.RGB(240, 240, 240)
-		//for i := 0; i < 5; i++ {
-		//	row := table.AddRow()
-		//	for j := 0; j < 3; j++ {
-		//		cell := row.AddCell()
-		//		// shade every other row
-		//		//if i%2 == 0 {
-		//		//	cell.Properties().SetShading(wml.ST_ShdSolid, veryLightGray, color.Auto)
-		//		//}
-		//		cell.AddParagraph().AddRun()
-		//	}
-		//}
-		doc.AddParagraph()
-	}
-
+type AlTest2 struct {
+	id string `json:"id"`
 }
 
 func test2() {
 	doc := document.New()
 
-	//{
-	//	para := doc.AddParagraph()
-	//	run := para.AddRun()
-	//	run.Properties().SetBold(true)
-	//	para.SetStyle("Heading1")
-	//
-	//	run.AddText("Introduction")
-	//}
-
 	addIntroduction(doc)
 
-	addRequestParameters(doc, AlTest{})
+	addRequestParameters(doc, &AlTest1{})
+
+	addResponseFields(doc, &AlTest1{})
+
 	doc.SaveToFile("tables.docx")
 }
 
