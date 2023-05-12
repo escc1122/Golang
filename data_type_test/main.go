@@ -10,6 +10,14 @@ func reflectPrint(test interface{}) {
 	valueOf := reflect.ValueOf(test)
 	fmt.Println("typeOf.Kind:", typeOf.Kind())
 	fmt.Println("valueOf:", valueOf)
+
+	for typeOf.Kind() == reflect.Pointer {
+		fmt.Println("pointer: ", valueOf.Pointer())
+		typeOf = typeOf.Elem()
+		valueOf = valueOf.Elem()
+		fmt.Println("Elem() typeOf.Kind:", typeOf.Kind())
+		fmt.Println("Elem() valueOf:", valueOf)
+	}
 }
 
 func printPoint(msg string, test interface{}) {
@@ -136,6 +144,7 @@ func testChannel() {
 	fmt.Println(<-a)
 }
 
+// 測試 Slice Range 某些情況下與預期不一樣
 // https://github.com/golang/gofrontend/blob/e387439bfd24d5e142874b8e68e7039f74c744d7/go/statements.cc#L5384
 func testSliceRange() {
 	type T struct {
@@ -145,22 +154,100 @@ func testSliceRange() {
 	t2 := T{id: 2}
 	ts1 := []T{t1, t2}
 	ts2 := []*T{}
-	for i, t := range ts1 {
-		//test1 pointer: 824633835656
-		//test1 pointer: 824633835656
-		printPoint("test1", &t)
+	ts3 := []*T{&t1, &t2}
+	ts4 := []*T{}
 
-		//test2 pointer: 824633835680
-		//test2 pointer: 824633835688
-		printPoint("test2", &ts1[i])
+	for _, t := range ts1 {
+		//typeOf.Kind: ptr
+		//valueOf: &{1}
+		//pointer:  824633835688
+		//Elem() typeOf.Kind: struct
+		//Elem() valueOf: {1}
+		//==============================================================
+		//typeOf.Kind: ptr
+		//valueOf: &{2}
+		//pointer:  824633835688
+		//Elem() typeOf.Kind: struct
+		//Elem() valueOf: {2}
+		reflectPrint(&t)
 		ts2 = append(ts2, &t)
+		fmt.Println("==============================================================")
 	}
-
 	//2
 	//2
 	for _, t := range ts2 {
 		fmt.Println((*t).id)
 	}
+
+	fmt.Println("==============================================================")
+
+	ts2 = []*T{}
+	for _, t := range ts1 {
+		tmp := t
+		//typeOf.Kind: ptr
+		//valueOf: &{1}
+		//pointer:  824633835784
+		//Elem() typeOf.Kind: struct
+		//Elem() valueOf: {1}
+		//==============================================================
+		//typeOf.Kind: ptr
+		//valueOf: &{2}
+		//pointer:  824633835816
+		//Elem() typeOf.Kind: struct
+		//Elem() valueOf: {2}
+		reflectPrint(&tmp)
+		ts2 = append(ts2, &tmp)
+		fmt.Println("==============================================================")
+	}
+	//1
+	//2
+	for _, t := range ts2 {
+		fmt.Println((*t).id)
+	}
+	fmt.Println("==============================================================")
+
+	for _, t := range ts3 {
+		//typeOf.Kind: ptr
+		//valueOf: &{1}
+		//pointer:  824634400856
+		//Elem() typeOf.Kind: struct
+		//Elem() valueOf: {1}
+		//==============================================================
+		//typeOf.Kind: ptr
+		//valueOf: &{2}
+		//pointer:  824634400880
+		//Elem() typeOf.Kind: struct
+		//Elem() valueOf: {2}
+		reflectPrint(t)
+		ts4 = append(ts4, t)
+		fmt.Println("==============================================================")
+	}
+
+	//1
+	//2
+	for _, t := range ts4 {
+		fmt.Println((*t).id)
+	}
+	fmt.Println("==============================================================")
+
+	// test
+	t3 := T{id: 3}
+	t3Point := &t3
+	//typeOf.Kind: ptr
+	//valueOf: &{3}
+	//pointer:  824633835912
+	//Elem() typeOf.Kind: struct
+	//Elem() valueOf: {3}
+	reflectPrint(t3Point)
+	fmt.Println("==============================================================")
+	t3 = T{id: 4}
+	//typeOf.Kind: ptr
+	//valueOf: &{4}
+	//pointer:  824633835912
+	//Elem() typeOf.Kind: struct
+	//Elem() valueOf: {4}
+	reflectPrint(t3Point)
+	fmt.Println("==============================================================")
 }
 
 func main() {
