@@ -34,12 +34,12 @@ func Test_facetGenerate(t *testing.T) {
 	groupOpt := mongo_tools.GetGroupGenerate().GroupBy("name3", "name").GroupBy("type3", "type").Sum("sum_age", "age").Sum("sum_money", "money").Count("count").GenBsonD()
 
 	facetGenerate := mongo_tools.GetFacetGenerate()
-	groupPipeline := mongo.Pipeline{groupOpt}
+	groupPipeline := &mongo.Pipeline{groupOpt}
 
 	limitStage := bson.D{{"$limit", 1}}
 	skipOpt := bson.D{{"$skip", 0}}
 	sortOpt := bson.D{{"$sort", bson.M{"_id": 1}}}
-	pipeline2 := mongo.Pipeline{sortOpt, skipOpt, limitStage}
+	pipeline2 := &mongo.Pipeline{sortOpt, skipOpt, limitStage}
 
 	facetGenerate.AppendPipeline("groupPipeline", groupPipeline)
 	facetGenerate.AppendPipeline("pipeline2", pipeline2)
