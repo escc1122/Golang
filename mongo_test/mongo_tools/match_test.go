@@ -8,27 +8,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
-	"math"
 	"testing"
 	"time"
 )
 
-type Student struct {
-	ID       string    `bson:"_id"`
-	Name     string    `bson:"name"`
-	Age      int       `bson:"age"`
-	Type     string    `bson:"type"`
-	Money    int       `bson:"money"`
-	TimeTest time.Time `bson:"time_test"`
-}
-
-type BucketTestSuit struct {
+type MatchTestSuit struct {
 	suite.Suite
 	testCount  uint32
 	collection *mongo.Collection
 }
 
-func (s *BucketTestSuit) SetupSuite() {
+func (s *MatchTestSuit) SetupSuite() {
 	fmt.Println("SetupSuite")
 
 	// 设置客户端连接配置
@@ -47,11 +37,11 @@ func (s *BucketTestSuit) SetupSuite() {
 	s.collection = client.Database("test").Collection("student")
 }
 
-func (s *BucketTestSuit) TearDownSuite() {
+func (s *MatchTestSuit) TearDownSuite() {
 	fmt.Println("TearDownSuite")
 }
 
-func (s *BucketTestSuit) SetupTest() {
+func (s *MatchTestSuit) SetupTest() {
 	fmt.Printf("SetupTest test count:%d\n", s.testCount)
 
 	time_test, _ := time.Parse(time.RFC3339, "2020-04-01T00:00:00+08:00")
@@ -113,114 +103,47 @@ func (s *BucketTestSuit) SetupTest() {
 		s2, s1, s3, s4, s5, s6,
 	}
 
-	//insertResult, err := s.collection.InsertOne(context.TODO(), s1)
-	//
-	//if err != nil {
-	//	log.Println(err)
-	//}
-	//fmt.Println(insertResult)
-
 	opt := &options.InsertManyOptions{}
-	//opt.SetOrdered(false)
 	opt.SetOrdered(false)
 
 	_, err2 := s.collection.InsertMany(context.TODO(), sArr, opt)
 	if err2 != nil {
 		log.Println(err2)
 	}
-
-	//fmt.Println(insertResult2)
-	//
-	//bulkOption := options.BulkWriteOptions{}
-	//bulkOption.SetOrdered(false)
-	//var operations []mongo.WriteModel
-	//operations = append(operations, mongo.NewInsertOneModel().SetDocument(s1))
-	//operations = append(operations, mongo.NewInsertOneModel().SetDocument(s2))
-	//operations = append(operations, mongo.NewInsertOneModel().SetDocument(s3))
-	//
-	//bulkWrite, err3 := s.collection.BulkWrite(context.TODO(), operations, &bulkOption)
-	//
-	//if err3 != nil {
-	//	log.Println(err3)
-	//}
-	//
-	//if reflect.TypeOf(err3).Name() == "BulkWriteException" {
-	//	fmt.Println("test")
-	//}
-	//
-	//fmt.Println(bulkWrite)
 }
 
-func (s *BucketTestSuit) TearDownTest() {
+func (s *MatchTestSuit) TearDownTest() {
 	s.testCount++
 	fmt.Printf("TearDownTest test count:%d\n", s.testCount)
 	s.collection.Drop(context.TODO())
 }
 
-func (s *BucketTestSuit) BeforeTest(suiteName, testName string) {
+func (s *MatchTestSuit) BeforeTest(suiteName, testName string) {
 	fmt.Printf("BeforeTest suite:%s test:%s\n", suiteName, testName)
 }
 
-func (s *BucketTestSuit) AfterTest(suiteName, testName string) {
+func (s *MatchTestSuit) AfterTest(suiteName, testName string) {
 	fmt.Printf("AfterTest suite:%s test:%s\n", suiteName, testName)
 }
 
-func (s *BucketTestSuit) TestBucket() {
-	fmt.Println("TestExample")
-
-	int64Max := math.MaxInt64
-	int32Max := math.MaxInt
-	int64Min := math.MinInt64
-	fmt.Println(int64Min)
-	if int64Max == int32Max {
-
-	}
-
-	a := []interface{}{0, 2, 4, 10, 15}
-
-	bucketGenerate := GetBucketGenerate("age", a, int64Max)
-
-	bucketGenerate.Count("count")
-
-	bucketGenerate.Sum("sum_test", "age")
-
-	bucketGenerate.Max("max_age", "age")
-
-	bbb := bucketGenerate.GenBsonD()
-
-	matchPipeline := mongo.Pipeline{bbb}
-
+func (s *MatchTestSuit) TestMatchGteLt() {
 	opt := &options.AggregateOptions{}
+	var results []*Student
+	matchOpt := GetMatchGenerate().GteLt("age", 10, 40).GenBsonD()
+	matchPipeline := mongo.Pipeline{matchOpt}
 	cursor, err := s.collection.Aggregate(context.TODO(), matchPipeline, opt)
 	if err != nil {
 		log.Println(err)
 	}
-
-	type resp struct {
-		ID      int64 `bson:"_id"`
-		Count   int64 `bson:"count"`
-		SumTest int64 `bson:"sum_test"`
-		MaxAge  int64 `bson:"max_age"`
-	}
-
-	var results []*resp
 	if err = cursor.All(context.TODO(), &results); err != nil {
 		panic(err)
 	}
 
 	assert.Equal(s.T(), 2, len(results))
-	assert.Equal(s.T(), int64(4), results[0].ID)
-	assert.Equal(s.T(), int64(1), results[0].Count)
-	assert.Equal(s.T(), int64(4), results[0].SumTest)
-	assert.Equal(s.T(), int64(4), results[0].MaxAge)
-
-	assert.Equal(s.T(), int64(9223372036854775807), results[1].ID)
-	assert.Equal(s.T(), int64(5), results[1].Count)
-	assert.Equal(s.T(), int64(199), results[1].SumTest)
-	assert.Equal(s.T(), int64(55), results[1].MaxAge)
-
+	assert.Equal(s.T(), "id1", results[0].ID)
+	assert.Equal(s.T(), "id3", results[1].ID)
 }
 
-func TestExample(t *testing.T) {
-	suite.Run(t, new(BucketTestSuit))
+func TestMatch(t *testing.T) {
+	suite.Run(t, new(MatchTestSuit))
 }
