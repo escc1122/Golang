@@ -1,6 +1,8 @@
 package main
 
-type MapReduce[T comparable] struct {
+import "golang.org/x/exp/constraints"
+
+type MapReduce[T constraints.Signed] struct {
 	s []T
 }
 
