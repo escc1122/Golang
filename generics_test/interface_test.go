@@ -10,3 +10,9 @@ func TestMyStruct_DoSomething(t *testing.T) {
 	obj = &MyStruct{}
 	assert.Equal(t, "Received integer: 42", obj.DoSomething(42))
 }
+
+// 研究中 不跑
+func TestMyStruct_ITest(t *testing.T) {
+	nodes := make([]TreeEntity[string, *TestAAA], 5555)
+	GenTree[string, *TestAAA, TreeEntity[string, *TestAAA]](nodes)
+}
