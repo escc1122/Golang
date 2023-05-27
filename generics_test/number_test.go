@@ -27,3 +27,12 @@ func Test_sum2(t *testing.T) {
 	v2 := sum2(int64(5), int64(7))
 	assert.Equal(t, int64(12), v2)
 }
+
+func Test_sum3(t *testing.T) {
+	var n1, n2 intA
+	n1 = 5
+	n2 = 7
+
+	v := sum3(n1, n2)
+	assert.Equal(t, intA(12), v)
+}
