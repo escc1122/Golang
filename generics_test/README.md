@@ -1,3 +1,5 @@
+https://go.dev/blog/when-generics
+
 https://segmentfault.com/a/1190000041634906
 
 https://zhuanlan.zhihu.com/p/153465652
