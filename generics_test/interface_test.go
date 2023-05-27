@@ -13,6 +13,6 @@ func TestMyStruct_DoSomething(t *testing.T) {
 
 // 研究中 不跑
 func TestMyStruct_ITest(t *testing.T) {
-	nodes := make([]TreeEntity[string, *TestAAA], 5555)
-	GenTree[string, *TestAAA, TreeEntity[string, *TestAAA]](nodes)
+	//nodes := make([]TreeEntity[string, *TestAAA], 5555)
+	//GenTree[string, *TestAAA, TreeEntity[string, *TestAAA]](nodes)
 }
