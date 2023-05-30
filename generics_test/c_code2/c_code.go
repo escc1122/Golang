@@ -16,25 +16,25 @@ type IData[K comparable, V comparable] interface {
 }
 
 type Tree[K comparable, V comparable] struct {
-	root    *Node[IData[K, V]]
-	nodeMap map[K]*Node[IData[K, V]]
+	root    *Node[K, V]
+	nodeMap map[K]*Node[K, V]
 }
 
-type Node[T ComparableIface] struct {
-	data     T
-	children []*Node[T]
+type Node[K comparable, V comparable] struct {
+	data     IData[K, V]
+	children []*Node[K, V]
 }
 
 func genTree[K comparable, V comparable](nodes []IData[K, V]) *Tree[K, V] {
 	tree := &Tree[K, V]{}
-	tree.nodeMap = map[K]*Node[IData[K, V]]{}
+	tree.nodeMap = map[K]*Node[K, V]{}
 	for _, node := range nodes {
-		tree.nodeMap[node.GetID()] = &Node[IData[K, V]]{data: node}
+		tree.nodeMap[node.GetID()] = &Node[K, V]{data: node}
 	}
 	return tree
 }
 
-func (t *Tree[K, V]) DFS(callback func(*Node[IData[K, V]])) {
+func (t *Tree[K, V]) DFS(callback func(*Node[K, V])) {
 	for _, v := range t.nodeMap {
 		callback(v)
 	}
