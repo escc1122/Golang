@@ -18,7 +18,7 @@ func TestNode_show(t *testing.T) {
 
 	authTree := genTree[string, *FolderIsTree](authNodes)
 
-	//authTree.DFS(func(node *Node[ITree[string, *FolderIsTree]]) {
+	//authTree.DFS(func(node *Node[IData[string, *FolderIsTree]]) {
 	authTree.DFS(func(node *Node[string, *FolderIsTree]) {
 		node.data.showData()
 	})
