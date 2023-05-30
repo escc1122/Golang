@@ -9,8 +9,7 @@ type IData interface {
 type ITree[K comparable, V comparable] interface {
 	GetID() K
 	Value() V
-	showData()
-	//IData
+	IData
 }
 
 type Tree[K comparable, V comparable] struct {
