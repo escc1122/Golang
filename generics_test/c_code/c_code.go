@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type IData interface {
 	showData()
@@ -22,14 +24,28 @@ type Node[T IData] struct {
 	children []*Node[T]
 }
 
+//type Tree[K comparable, V comparable] struct {
+//	root    *Node[K, V]
+//	nodeMap map[K]*Node[K, V]
+//}
+//
+//type Node[K comparable, V comparable] struct {
+//	data     ITree[K, V]
+//	children []*Node[K, V]
+//}
+
 func genTree[K comparable, V comparable](nodes []ITree[K, V]) *Tree[K, V] {
 	tree := &Tree[K, V]{}
 	tree.nodeMap = map[K]*Node[ITree[K, V]]{}
+	//tree.nodeMap = map[K]*Node[K, V]{}
 	for _, node := range nodes {
 		tree.nodeMap[node.GetID()] = &Node[ITree[K, V]]{data: node}
+		//tree.nodeMap[node.GetID()] = &Node[K, V]{data: node}
 	}
 	return tree
 }
+
+// func (t *Tree[K, V]) DFS(callback func(*Node[K, V])) {
 
 func (t *Tree[K, V]) DFS(callback func(*Node[ITree[K, V]])) {
 	for _, v := range t.nodeMap {
