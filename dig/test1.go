@@ -2,45 +2,31 @@ package main
 
 import (
 	"fmt"
-
-	"go.uber.org/dig"
 )
 
-type User struct {
-	ID int64
+type CarA struct {
 }
 
-type Repo interface {
-	Get(int64) (*User, error)
+func (r *CarA) Get() string {
+	return "CarA"
 }
 
-type repo struct{}
-
-func (r *repo) Get(id int64) (*User, error) {
-	return &User{ID: id}, nil
+func getCarA() *CarA {
+	return &CarA{}
 }
 
-func NewRepo() Repo {
-	return &repo{}
+type CarB struct {
 }
 
-type Service struct {
-	r Repo
+func (c *CarB) Get() string {
+	return "CarB"
 }
 
-func NewService(r Repo) *Service {
-	return &Service{r: r}
+func getCarB() *CarB {
+	return &CarB{}
 }
 
-func test1() {
-	container := dig.New()
-
-	container.Provide(NewRepo)
-	container.Provide(NewService)
-
-	container.Invoke(func(s *Service) {
-		u, err := s.r.Get(1)
-		fmt.Printf("user %+v err %+v", u, err)
-	})
-
+func test1(carA *CarA, carB *CarB) {
+	fmt.Println(carA.Get())
+	fmt.Println(carB.Get())
 }
