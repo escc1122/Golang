@@ -11,15 +11,15 @@ func (r *CarA) Get() string {
 	return "CarA"
 }
 
-func getCarA() *CarA {
-	return &CarA{}
-}
-
 type CarB struct {
 }
 
 func (c *CarB) Get() string {
 	return "CarB"
+}
+
+func getCarA() *CarA {
+	return &CarA{}
 }
 
 func getCarB() *CarB {
